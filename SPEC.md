@@ -4,8 +4,8 @@ A small habit tracker, built as a practice project. Two goals sit above the app
 itself: learn **Supabase** (auth + Postgres + Row Level Security), and learn
 **spec-driven development** — write the checklist first, then build to it.
 
-**Live URL:** `https://growtopia8911-star.github.io/SPEC/` (once Pages is switched on)
-**Repo:** https://github.com/growtopia8911-star/SPEC
+**Live URL:** `https://growtopia8911-star.github.io/habit-tracker/` (once Pages is switched on)
+**Repo:** https://github.com/growtopia8911-star/habit-tracker
 **Stack:** plain HTML/CSS/JS, no build step · Supabase (auth + Postgres) · GitHub Pages
 
 ---
