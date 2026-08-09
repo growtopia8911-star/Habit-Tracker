@@ -1,0 +1,15 @@
+{
+  "name": "habit-tracker-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Acceptance tests for the checklist in ../SPEC.md. Deliberately its own package: the app has no dependencies and no build step, and that stays true.",
+  "scripts": {
+    "serve": "python3 -m http.server 8765 --directory ..",
+    "test": "node auth.test.mjs http://localhost:8765/",
+    "test:live": "node auth.test.mjs https://growtopia8911-star.github.io/Habit-Tracker/"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
