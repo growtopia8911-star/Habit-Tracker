@@ -215,12 +215,14 @@ Each line is a yes/no you can check by hand, and each is a candidate for a test.
 The loop: write the test, watch it fail, then build.
 
 ### Auth
-- [ ] Signing up with a new email and password creates an account and lands on Today
-- [ ] Signing in with the correct password lands on Today
-- [ ] Signing in with a wrong password shows an error and stays on Login
-- [ ] Refreshing the page while signed in stays signed in
-- [ ] Signing out returns to Login, and refreshing does not sneak back in
-- [ ] Visiting the URL signed out shows Login and no habit data
+*All verified against the live Pages URL on 2026-08-08, in real Chrome.*
+
+- [x] Signing up with a new email and password creates an account and lands on Today
+- [x] Signing in with the correct password lands on Today
+- [x] Signing in with a wrong password shows an error and stays on Login
+- [x] Refreshing the page while signed in stays signed in
+- [x] Signing out returns to Login, and refreshing does not sneak back in
+- [x] Visiting the URL signed out shows Login and no habit data
 
 ### Habits
 - [ ] Creating a habit makes it appear in the Today list without a refresh
