@@ -2,6 +2,8 @@
   --bg: #14161a;
   --text: #e8e6e3;
   --muted: #8b9099;
+  --ok: #7ddc9a;
+  --bad: #ff8f7a;
 }
 
 * {
@@ -27,7 +29,15 @@ h1 {
   font-size: 1.75rem;
 }
 
-.subtitle {
+.status {
   margin: 0;
   color: var(--muted);
+}
+
+.status-ok {
+  color: var(--ok);
+}
+
+.status-bad {
+  color: var(--bad);
 }
