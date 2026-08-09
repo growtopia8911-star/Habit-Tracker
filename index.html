@@ -10,7 +10,42 @@
   <body>
     <main>
       <h1>Habit Tracker</h1>
-      <p id="status" class="status">Checking connection…</p>
+
+      <!-- Fatal problems that are nothing to do with the password: Supabase
+           unreachable, key wrong. Kept separate from the form's own error so the
+           two can never overwrite each other. -->
+      <p id="fatal" class="status status-bad" role="alert" hidden></p>
+
+      <!-- Screens. No router — one page, sections shown and hidden. Both start
+           hidden so nothing flashes before the session check decides. -->
+
+      <section id="screen-login" hidden>
+        <form id="login-form" novalidate>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" />
+
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+          />
+
+          <div class="row">
+            <button id="sign-in" type="submit">Sign in</button>
+            <button id="sign-up" type="button" class="secondary">Sign up</button>
+          </div>
+
+          <p id="auth-error" class="status status-bad" role="alert" hidden></p>
+        </form>
+      </section>
+
+      <section id="screen-today" hidden>
+        <p id="signed-in-as" class="muted"></p>
+        <p>Habits arrive at step 5.</p>
+        <button id="sign-out" type="button" class="secondary">Sign out</button>
+      </section>
     </main>
   </body>
 </html>

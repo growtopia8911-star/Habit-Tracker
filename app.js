@@ -1,31 +1,117 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.2/+esm";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./config.js";
+import { signUp, signIn, signOut, currentSession, onAuthChange } from "./auth.js";
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const el = {
+  fatal: document.querySelector("#fatal"),
+  login: document.querySelector("#screen-login"),
+  today: document.querySelector("#screen-today"),
+  form: document.querySelector("#login-form"),
+  email: document.querySelector("#email"),
+  password: document.querySelector("#password"),
+  signUp: document.querySelector("#sign-up"),
+  signOut: document.querySelector("#sign-out"),
+  error: document.querySelector("#auth-error"),
+  signedInAs: document.querySelector("#signed-in-as"),
+};
 
-// Step 3 proves exactly one thing: the live page can reach Supabase. Nothing
-// else is built yet, so the check has to work with no tables and nobody signed
-// in — getSession() is the cheapest call that fits. Signed out it returns
-// { session: null } and no error, and that is a success: the question is
-// whether the auth server answered, not whether anyone is logged in.
-//
-// Proving this now, in isolation, is the same reasoning as putting the empty
-// page live before any feature existed. A later auth bug should never have
-// "...or maybe the key is wrong" as a live possibility.
+// --- rendering -------------------------------------------------------------
 
-const statusEl = document.querySelector("#status");
-
-function show(message, ok) {
-  statusEl.textContent = message;
-  statusEl.className = ok ? "status status-ok" : "status status-bad";
+// The only function that decides which screen is visible. Everything else
+// changes the session and lets this react, so there is never a code path that
+// shows Today without a session.
+function render(session) {
+  const signedIn = Boolean(session);
+  el.login.hidden = signedIn;
+  el.today.hidden = !signedIn;
+  el.signedInAs.textContent = signedIn ? `Signed in as ${session.user.email}` : "";
+  if (signedIn) clearError();
 }
 
-try {
-  const { error } = await supabase.auth.getSession();
-  if (error) throw error;
-  show("Connected to Supabase.", true);
-  console.log("connected");
-} catch (err) {
-  show(`Could not reach Supabase — ${err.message}`, false);
-  console.error("Supabase connection failed:", err);
+function showError(message) {
+  el.error.textContent = message;
+  el.error.hidden = false;
 }
+
+function clearError() {
+  el.error.textContent = "";
+  el.error.hidden = true;
+}
+
+function showFatal(message) {
+  el.fatal.textContent = message;
+  el.fatal.hidden = false;
+}
+
+// Stops a second click while the first request is still in flight — the fastest
+// way to end up with two accounts or two confusing errors.
+function setBusy(busy) {
+  for (const node of [el.signUp, el.signOut, ...el.form.elements]) {
+    node.disabled = busy;
+  }
+}
+
+// --- form handling ---------------------------------------------------------
+
+// Checked here rather than with the `required` attribute so the message appears
+// in the same place as every other error, instead of in a browser tooltip that
+// looks nothing like the rest of the app.
+function credentials() {
+  const email = el.email.value.trim();
+  const password = el.password.value;
+
+  if (!email) return { ok: false, message: "Enter an email address." };
+  if (!password) return { ok: false, message: "Enter a password." };
+  return { ok: true, email, password };
+}
+
+async function submit(action) {
+  clearError();
+
+  const input = credentials();
+  if (!input.ok) return showError(input.message);
+
+  setBusy(true);
+  try {
+    const result = await action(input.email, input.password);
+    // On success, render() runs via onAuthChange rather than here — one path to
+    // Today, whether you just signed in or arrived with a stored session.
+    if (!result.ok) showError(result.message);
+    else el.password.value = "";
+  } finally {
+    setBusy(false);
+  }
+}
+
+el.form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  submit(signIn);
+});
+
+el.signUp.addEventListener("click", () => submit(signUp));
+
+el.signOut.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    const result = await signOut();
+    if (!result.ok) showError(result.message);
+  } finally {
+    setBusy(false);
+  }
+});
+
+// --- boot ------------------------------------------------------------------
+
+// The stored session is read before anything renders, so a refresh while signed
+// in goes straight to Today instead of flashing the login form first.
+const initial = await currentSession();
+if (!initial.ok) {
+  showFatal(`Could not reach Supabase — ${initial.message}`);
+  render(null);
+} else {
+  render(initial.session);
+}
+
+onAuthChange(render);
+
+// Lets the test harness wait for a settled first render instead of guessing with
+// a timeout. Costs one attribute and removes a whole class of flaky test.
+document.body.dataset.ready = "true";
