@@ -1,0 +1,7 @@
+.env
+.DS_Store
+node_modules/
+__pycache__/
+
+# Machine-specific — points at the local Obsidian vault
+*.code-workspace
